@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الكونفورماسيون ديال الكوموندات</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<style>
+:root{--bg:#f2f5f3;--card:#fff;--ink:#14231f;--mute:#5d6f69;--line:#dbe4e0;--pri:#0e7c66;--priS:#d9f0ea;--wait:#a86d00;--waitS:#fbefd2;--no:#b3412f;--noS:#f8dfd9}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1916;--card:#17251f;--ink:#e8f1ed;--mute:#9bb0a8;--line:#27382f;--pri:#3fc2a5;--priS:#17382f;--wait:#f0b94a;--waitS:#3a2f12;--no:#f08a78;--noS:#3d1f19}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",system-ui,sans-serif;font-size:16px;line-height:1.6;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+h1{font-size:24px;font-weight:800;margin:8px 0 2px}
+.sub{color:var(--mute);margin:0 0 16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-size:26px;font-weight:800;line-height:1.2}
+.stat span{font-size:13px;color:var(--mute)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:6px 14px;font:inherit;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--pri);border-color:var(--pri);color:#fff}
+input{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.search{flex:1;min-width:160px}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700}
+.list{display:grid;gap:8px}
+.row{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.name{font-weight:700}
+.meta{color:var(--mute);font-size:14px}
+.note{margin-top:8px;background:var(--waitS);color:var(--wait);border-radius:8px;padding:6px 10px;font-size:14px}
+.badge{border-radius:20px;padding:2px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.b-waiting{background:var(--waitS);color:var(--wait)}.b-confirmed{background:var(--priS);color:var(--pri)}.b-cancelled,.b-send_failed{background:var(--noS);color:var(--no)}.b-edit_requested{background:var(--waitS);color:var(--wait)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:16px}
+.panel h2{font-size:17px;margin:0 0 8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.demo{font-size:13px;color:var(--mute);margin-top:6px}
+.empty{text-align:center;color:var(--mute);padding:24px}
+#login{max-width:420px;margin:48px auto}
+@media (max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap" id="login" hidden>
+  <h1>دخول</h1>
+  <p class="sub">دخل الكلمة السرية (API_KEY) ديال السيرفر.</p>
+  <input id="key" type="password" placeholder="API_KEY" aria-label="API key">
+  <p><button class="btn" id="go" type="button">دخول</button></p>
+  <div class="demo" id="lerr" role="status"></div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <h1>الكونفورماسيون ديال الكوموندات</h1>
+  <p class="sub">الكوموندات كيتحدثو بوحدهم ملي الكليان كيجاوب فالواتساب.</p>
+  <div class="stats" id="stats"></div>
+  <div class="bar">
+    <input class="search" id="q" type="search" placeholder="قلب بالسمية، التيليفون ولا المدينة" aria-label="قلب">
+    <div class="tabs" id="tabs" role="group" aria-label="الحالة"></div>
+  </div>
+  <div class="list" id="list"></div>
+
+  <div class="panel">
+    <h2>زيد كوموند جديدة (كيتصيفط ليها ميساج بوحدو)</h2>
+    <div class="grid">
+      <input id="fn" placeholder="سمية الكليان" aria-label="سمية الكليان">
+      <input id="fp" placeholder="التيليفون (06...)" inputmode="tel" aria-label="التيليفون">
+      <input id="fc" placeholder="المدينة" aria-label="المدينة">
+      <input id="fr" placeholder="المنتوج" aria-label="المنتوج">
+      <input id="fq" placeholder="الكمية" inputmode="numeric" aria-label="الكمية">
+      <input id="fm" placeholder="الثمن بالدرهم" inputmode="numeric" aria-label="الثمن">
+    </div>
+    <p><button class="btn" id="add" type="button">زيد وصيفط الميساج</button></p>
+    <div class="demo" id="msg" role="status"></div>
+  </div>
+</div>
+
+<script>
+var LABEL={waiting:"فانتظار الجواب",confirmed:"مؤكدة",cancelled:"ملغاة",edit_requested:"باغي تعديل",send_failed:"ما تصيفطاتش"};
+var TABS=[["all","الكل"],["waiting","فانتظار الجواب"],["confirmed","مؤكدة"],["edit_requested","تعديل"],["cancelled","ملغاة"]];
+var key="",orders=[],filter="all",timer=null;
+try{key=localStorage.getItem("conf-key")||""}catch(e){}
+function $(i){return document.getElementById(i)}
+function esc(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function api(path,opt){opt=opt||{};opt.headers=Object.assign({"x-api-key":key,"Content-Type":"application/json"},opt.headers||{});
+  return fetch(path,opt).then(function(r){if(r.status===401){logout();throw new Error("401")}return r.json()})}
+function logout(){try{localStorage.removeItem("conf-key")}catch(e){}key="";clearInterval(timer);$("app").hidden=true;$("login").hidden=false}
+function load(){return api("/orders").then(function(d){orders=d;render()}).catch(function(){})}
+function start(){$("login").hidden=true;$("app").hidden=false;load();clearInterval(timer);timer=setInterval(load,10000)}
+function render(){
+  var c={waiting:0,confirmed:0,edit_requested:0,cancelled:0};
+  orders.forEach(function(o){if(c[o.status]!==undefined)c[o.status]++});
+  $("stats").innerHTML=[["فانتظار الجواب","waiting"],["مؤكدة","confirmed"],["باغين تعديل","edit_requested"],["ملغاة","cancelled"]].map(function(x){return '<div class="stat"><b>'+c[x[1]]+'</b><span>'+x[0]+'</span></div>'}).join("");
+  $("tabs").innerHTML=TABS.map(function(t){return '<button class="tab" type="button" data-f="'+t[0]+'" aria-pressed="'+(filter===t[0])+'">'+t[1]+'</button>'}).join("");
+  var q=$("q").value.trim().toLowerCase();
+  var rows=orders.filter(function(o){return(filter==="all"||o.status===filter)&&(!q||(o.name+o.phone+o.city+o.product).toLowerCase().indexOf(q)>-1)});
+  $("list").innerHTML=rows.length?rows.map(function(o){
+    return '<div class="row"><div class="top"><div><div class="name">'+esc(o.name)+'</div><div class="meta">'+esc(o.phone)+(o.city?' · '+esc(o.city):'')+'</div><div class="meta">'+esc(o.product)+' · الكمية '+esc(o.qty)+' · '+esc(o.price)+' درهم</div></div><span class="badge b-'+esc(o.status)+'">'+(LABEL[o.status]||esc(o.status))+'</span></div>'+(o.note?'<div class="note">'+(o.status==="send_failed"?"الخطأ: ":"ملاحظة الكليان: ")+esc(o.note)+'</div>':'')+'</div>'
+  }).join(""):'<div class="empty">ما كاين حتى كوموند هنا.</div>';
+}
+document.addEventListener("click",function(e){var t=e.target.closest(".tab");if(t){filter=t.dataset.f;render()}});
+$("q").addEventListener("input",render);
+$("go").addEventListener("click",function(){
+  key=$("key").value.trim();if(!key)return;
+  fetch("/orders",{headers:{"x-api-key":key}}).then(function(r){
+    if(r.status===401){$("lerr").textContent="الكلمة السرية غالطة.";return}
+    try{localStorage.setItem("conf-key",key)}catch(e){}start()});
+});
+$("add").addEventListener("click",function(){
+  var m=$("msg"),b=$("add"),n=$("fn").value.trim(),p=$("fp").value.trim(),r=$("fr").value.trim();
+  if(!n||!p||!r){m.textContent="كتب السمية، التيليفون والمنتوج.";return}
+  b.disabled=true;m.textContent="كيتصيفط...";
+  api("/orders",{method:"POST",body:JSON.stringify({name:n,phone:p,product:r,city:$("fc").value.trim(),qty:+$("fq").value||1,price:+$("fm").value||0})})
+   .then(function(o){["fn","fp","fc","fr","fq","fm"].forEach(function(i){$(i).value=""});
+     m.textContent=o.status==="send_failed"?"تزادت الكوموند ولكن الميساج ما تصيفطش، شوف الخطأ فاللائحة.":"تزادت الكوموند وتصيفط الميساج.";load()})
+   .catch(function(){m.textContent="وقع مشكل، عاود جرب."}).then(function(){b.disabled=false});
+});
+if(key)start();else $("login").hidden=false;
+</script>
+</body>
+</html>
