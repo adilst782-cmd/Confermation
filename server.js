@@ -12,7 +12,7 @@ const {
   PORT = 3000,
 } = process.env;
 
-const DB = process.env.DB_PATH || "./orders.json";
+const DB = "./orders.json";
 const load = () => (fs.existsSync(DB) ? JSON.parse(fs.readFileSync(DB)) : []);
 const save = (o) => fs.writeFileSync(DB, JSON.stringify(o, null, 2));
 
